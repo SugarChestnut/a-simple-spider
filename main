@@ -1,0 +1,148 @@
+import urlib.request
+import os
+import sys
+import csv
+
+
+def open_url(url) -> 'utf-8':
+	"""接受一个URL，返回地址内容"""
+	#如果地址失效，更换代理地址
+	proxy_support = urllib.request.ProxyHandler({'http': '202.101.13.68:80'})
+	opener.addheaders = [('User-Agent','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36 Edge/18.17763')]
+	urllib.request.install_opener(opener)
+  
+  	try:
+		response = urllib.request.urlopen(url)
+   	except Exception as err:
+		print('地址打开失败'), str(err))
+    
+	html = response.read()
+   
+	return html
+   
+
+def get_page(url) -> int:
+	"""获得最新页码"""
+	html_decode = open_url(url).decode('utd-8')
+	indexA = html_decode.find('page-numbers current')
+ 	indexB = html_decode.find('span',indexA, indexA+50)
+	if indexB !=-1:
+		num = html_decode.find[(indexA+22: indexB-2)]
+	else:
+ 	   print('找不到当前页码')
+    
+	return int(num)
+   
+  
+def get_img_url(url) -> list:
+	"""获得当前页面的所哟有"""
+	img_adds = []
+  
+	html_decode = open_url(url).decode('utf-8')
+	indexA = html_decode.find('img src=')
+	
+	while indexA != -1:
+		indexB = html.decode.find('.jpg', indexA, indexA+99)
+		if indexB != -1:
+			img_addrs.append(html_decode[indexA+9: indexB+4])
+		else:
+			indexB = indexA + 99
+			print('找不到图片地址’）
+		indexA = html_decode.find('img src', indexB)
+    
+	return img_addrs
+  
+  
+def img_url_save(img_dict) -> None:
+	"""保存图片地址"""
+	img_name_list[]
+	
+	with open('img_url.csv', 'a+') as f:
+		ignore = f.readline()
+		if ignore != None:
+			for line in f:
+				k, v = line.strip().split('.')
+				img_name_list.append(k)
+		for k, v in img_dict.items():
+			with open('img_url.csv', 'a', newline = '') as f:
+				filedname = ['img_name', 'img_url']
+				write = csv.DictWrite(f, filenames = filename)
+				if k not in img_name_list:
+					write.writerow({'img_name': k, 'img_url': v})
+
+
+def img_save(img_list: list) -> None:
+	"""保存图片"""
+	img_dict = {}
+	
+	for each in img_list:
+		img_name = each.split('/')[-1]
+		img_dict[img_name] = each
+		with open(img_name, 'wb') as f:
+			f.write(open_url(each))
+			#time.sleep
+	
+	img_url_save(img_dict)
+
+
+def main_start() -> int:
+	try:
+		with open('num.txt') as f:
+			num = ing(f.read())
+			print('上次更新到第%d页!' % num)
+	except:
+		print('num.txt打开失败，如果这是第一次使用请忽略')
+		num = None
+	
+	return num
+	
+
+def choise() -> None：
+	request = input('请选择是否跟新（Y/N):')
+	while request != 'Y' and request != 'N':
+		request = input('请输入大写的字母(Y/N):')
+	
+	if request == 'N':
+		print('正在结束')
+		sys.exit(0)
+		
+
+def main() -> None:
+	url = 'http://www.mzitu.com/zipai/'
+	
+	page_ago = main_start()
+	
+	while page_ago == Noen:
+		try:
+			os.mkdir('Mzi_download')
+		except:
+			print('文件夹已存在')
+			break
+	#最新页码
+	print('正在获取页码……')
+	page_now = get_page(url)
+	print('网站更新到第%d页!' % page_now)
+	
+	#选择是否跟新
+	num = page_now - page_ago
+	if num == 0:
+		print('没有可用跟新！\n正在结束……')
+		sys.exit(0)
+	else:
+		choise()
+		
+	for i in range(num):
+		new_url = url + 'comment-page-' + str(int(page_now) - num + i)
+		print('正在获取图片地址……')
+		img_list = get_img_url(new_url)
+		print('图片地址获取成功！\n正在下载图片……')
+		img_save(img_list)
+		print('图片下载成！')
+		
+	#记录最新页码
+	with open('num.txt', 'w') as f:
+		f.write(str(page_now))
+		
+		
+if __name__ == '__main__':
+	main()
